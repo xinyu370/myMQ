@@ -57,9 +57,9 @@ public class ConsumerClient {
         });
     }
 
-    public void getMessage() throws Exception {
+    public void getMessage(String topic) throws Exception {
         log.info("获取消息");
-        Request request = new Request(RequestType.GET_MESSAGE,null);
+        Request request = new Request(RequestType.GET_MESSAGE,new Msg(topic,null));
         if(channel==null){
             throw new Exception("未完成初始化");
         }

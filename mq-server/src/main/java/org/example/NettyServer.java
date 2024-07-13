@@ -9,13 +9,17 @@ import io.netty.handler.codec.serialization.ClassResolvers;
 import io.netty.handler.codec.serialization.ObjectDecoder;
 import io.netty.handler.codec.serialization.ObjectEncoder;
 import lombok.extern.slf4j.Slf4j;
+import org.example.store.ConsumeIndexStore;
 
-import java.util.concurrent.ArrayBlockingQueue;
+import java.util.Map;
+import java.util.concurrent.*;
 
 @Slf4j
 public class NettyServer {
     public static ArrayBlockingQueue<Msg> queue = new ArrayBlockingQueue<>(1024);
+    public static Map<String/**topic*/, ArrayBlockingQueue> topicQueue = new ConcurrentHashMap<>();
     public static void main(String[] args) throws InterruptedException {
+        init();
         EventLoopGroup boss = new NioEventLoopGroup(1);
         EventLoopGroup worker = new NioEventLoopGroup();
         try {
@@ -38,6 +42,22 @@ public class NettyServer {
             worker.shutdownGracefully();
         }
 
+    }
+
+    public static void init(){
+//        ScheduledExecutorService scheduledExecutorService = Executors.newScheduledThreadPool(1);
+//        scheduledExecutorService.scheduleAtFixedRate(new Runnable() {
+//            @Override
+//            public void run() {
+//                System.out.println("当前队列size:"+topicQueue.size());
+//            }
+//        },0,10, TimeUnit.SECONDS);
+        ConsumeIndexStore.getInstance().resumeMsg();
+        //钩子函数->用于释放资源
+        Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+            System.out.println("资源释放...");
+            ConsumeIndexStore.getInstance().shutDown();
+        }));
     }
 
 }

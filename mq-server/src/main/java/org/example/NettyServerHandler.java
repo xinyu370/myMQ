@@ -6,7 +6,12 @@ import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
 import io.netty.channel.SimpleChannelInboundHandler;
 import lombok.extern.slf4j.Slf4j;
+import org.example.service.GetMsg;
+import org.example.service.SaveMsg;
+import org.example.service.impl.GetMsgImpl;
+import org.example.service.impl.SaveMsgImpl;
 
+import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
 
@@ -19,12 +24,10 @@ public class NettyServerHandler  extends ChannelInboundHandlerAdapter{
 //        System.out.println("hehe");
 //        super.channelRead(ctx, msg);
 //    }
-
-
+    private SaveMsg saveMsg = new SaveMsgImpl();
+    private GetMsg getMsg = new GetMsgImpl();
     @Override
     public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
-       // ByteBuf buf = (ByteBuf) msg;
-//        String string = buf.toString(Charset.forName("utf-8"));
         log.info("接收到消息:"+msg);
         Request request = JSON.parseObject(msg+"", Request.class);
         switch (request.getType()) {
@@ -32,18 +35,20 @@ public class NettyServerHandler  extends ChannelInboundHandlerAdapter{
                 handleSendMessage(ctx, request.getMessage());
                 break;
             case GET_MESSAGE:
-                handleGetMessage(ctx);
+                handleGetMessage(ctx,request.getMessage().getTitle());
                 break;
         }
     }
 
-    private void handleSendMessage(ChannelHandlerContext ctx, Msg message) {
-        NettyServer.queue.add(message);
+    private void handleSendMessage(ChannelHandlerContext ctx, Msg message) throws IOException {
+        saveMsg.saveMsg(message,true);
+        //NettyServer.queue.add(message);
         ctx.writeAndFlush(JSON.toJSONString(new Response()));
     }
 
-    private void handleGetMessage(ChannelHandlerContext ctx) {
-        Msg message = NettyServer.queue.poll();
+    private void handleGetMessage(ChannelHandlerContext ctx,String topic) {
+//        Msg message = NettyServer.queue.poll();
+        Msg message = getMsg.getMsg(topic);
         log.info("弹出消息:{}",JSON.toJSONString(message));
         if (message == null) {
             ctx.writeAndFlush(JSON.toJSONString(new Response(new Msg())));

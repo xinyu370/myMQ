@@ -17,7 +17,7 @@ public class TestConsumer {
         client.setHost("127.0.0.1");
         client.setPort(8080);
         client.start();
-        client.getMessage();
+        client.getMessage("测试");
     }
 
 

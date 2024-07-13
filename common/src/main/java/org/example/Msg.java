@@ -5,12 +5,16 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Data
-@AllArgsConstructor
 @NoArgsConstructor
 public class Msg<T> {
 
-    private String title;
+    public Msg(String title,T msg){
+        this.title = title;
+        this.msg = msg;
+    }
+    private String msgId;
 
+    private String title;
 
     private T msg;
 }

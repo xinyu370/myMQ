@@ -10,7 +10,10 @@ public class TestProducer {
         sendClient.setHost("127.0.0.1");
         sendClient.setPort(8080);
         sendClient.start();
-        sendClient.send(new Msg("测试","hello world"));
+        for (int i = 0; i < 40; i++) {
+            sendClient.send(new Msg("测试","hello world"+i));
+        }
+
         //sendClient.shutDown();
     }
 }
